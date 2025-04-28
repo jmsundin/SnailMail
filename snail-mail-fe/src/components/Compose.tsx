@@ -5,7 +5,8 @@
 import axios from "axios"
 import { useState } from "react"
 
-    //TODO: 2) [We'll talk about this when we talk about Cypress]
+//our Props interface outlines 1 entity
+// 1) The function that closes the component
 interface Props {
     onClose: () => void
 }
@@ -19,7 +20,8 @@ interface Mail {
 }
 
 //Props stands for "properties" - the object of properties passed into the component
-export const Compose:React.FC<Props> = ({onClose}) => {
+//Note the "...testId" - this is the data attribute that we'll use to select this component for tests
+export const Compose:React.FC<Props> = ({onClose, ...testId}) => {
 
     //useState for the mail object - as the inputs in Compose change, this object will be filled with values
     const [mailToSend, setMailToSend] = useState<Mail>({
@@ -79,7 +81,7 @@ export const Compose:React.FC<Props> = ({onClose}) => {
     }
 
     return(
-        <div className="card shadow position-absolute bottom-0 end-0 m-5 ">
+        <div className="card shadow position-absolute bottom-0 end-0 m-5 " {...testId}>
 
             <h6 className="border-bottom position-absolute top-0 start-0 m-2">Compose Email</h6>
             <button onClick={onClose} className="btn-close position-absolute top-0 end-0 m-1"></button>

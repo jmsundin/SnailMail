@@ -6,10 +6,10 @@
 /* TEST SUITE OVERVIEW 
    
     1) Check that a real, successful GET request to the backend works as expected
-    2) 
-    3)
-    4)
-    5)
+    2) Check that a real, successful GET request to the backend works as expected when there is no mail
+    3) Check that a real, failed GET request is handled as expected
+    4) Check that a fake GET inbox request (with mock data) to the backend works as expected
+    5) Check that clicking the "compose email" button opens the Compose.tsx Component
 
 */
 
@@ -63,6 +63,58 @@ describe("Inbox Component Tests", () => {
         cy.contains("No Mail! You're all caught up!").should("be.visible")
         cy.get("table").should("not.exist")
         cy.get("button").contains("Compose Email").should("be.visible")
+
+    })
+
+    //test 3------------
+    it("Displays an error alert and shows the 'no mail' message wif fetch inbox request fails", () => {
+
+        //Force an error response after intercepting the HTTP response (note the shorthand for the URL)
+        cy.intercept("GET", "/mail", {
+            forceNetworkError: true //fail the test, triggering the catch block in the component
+        })
+
+        //Stub the alert popup so Cypress doesn't get interrupted
+        //"Stub?" we're faking the alert trigger so Cypress can track it, but not actually cause a popup
+        cy.on("window:alert", cy.stub().as("alert"))
+
+        //Confirm the alert() got triggered with the appropriate error message
+        cy.get("@alert").should("have.been.calledWith", "There was a problem when fetching your inbox! Please try again later")
+
+    })
+
+    //test 4------------------
+    it("Displays fake mail after intercepting the GET request with a fixture", () => {
+
+        //Entirely replace the response body of the GET request with our fixture
+        cy.intercept("GET", "/mail", {fixture: "inbox.json"})
+
+        //Check that the table renders, check the email are exactly what we expect
+        cy.get("table").should("exist")
+
+        cy.contains("td", "beetle@snailmail.com").should("exist")
+        cy.contains("td", "I am a beetle").should("exist")
+        cy.contains("td", "*beetle noises*").should("exist")
+
+        //TODO: could check the other two trs, but you get the point
+
+        //Mock Philosophy: try to emulate the test that has a real GET request, so we can make sure everything works locally if the HTTP-based test fails 
+    })
+
+    //test 5-------------
+    //***NOTE: this test will be really helpful when you test the Compose component for your project 
+    it("Renders the Compose component when the button is clicked", () => {
+
+        //Find and click the button that opens the Compose component
+        cy.get("button").click()
+
+        //Assert that the compose component is visible - using a data attribute
+        cy.get("[data-testid='compose-component']")
+        .should("exist")
+        .should("be.visible")
+
+        //can we chain should()s like this? looks like it
+        //SHOULD we? sure, maybe put them on different lines like seen above
 
     })
 

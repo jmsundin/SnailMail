@@ -25,8 +25,9 @@ function App() {
 
       {/* We'll define a boolean variable called showCompose.
           If showCompose is true, show the Compose component.
-          If showCompose is false, show the button that opens the Compose component */}
-      {showCompose ? <Compose onClose={toggleShowCompose}/> 
+          If showCompose is false, show the button that opens the Compose component 
+        NOTICE: the data attribute - it'll help us select the Compose component for our tests */}
+      {showCompose ? <Compose data-testid="compose-component" onClose={toggleShowCompose}/> 
       : <button className="btn btn-sm btn-outline-primary" onClick={toggleShowCompose}>Compose Email</button>}
 
     </div>
