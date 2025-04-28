@@ -148,6 +148,31 @@ describe("Inbox Component Tests", () => {
         cy.get("@alert").should("have.been.called")
     })
 
-   
+    // test 8-------------
+    // error alert is displayed when HTTP request fails
+    it("Error alert is displayed when HTTP request fails", () => {
+        // force the HTTP request to fail
+        cy.intercept("POST", "/mail", {
+          forceNetworkError: true
+        })
+
+        // stub the alert popup so Cypress doesn't get interrupted
+        cy.on("window:alert", cy.stub().as("alert"))
+
+        // click the button to open the compose component
+        cy.get("button").contains("Compose Email").click()
+
+        // type in the compose component
+        cy.get("input[name='recipient']").type("test@example.com")
+        cy.get("input[name='subject']").type("Test Subject")
+        cy.get("textarea[name='body']").type("Test Body")
+
+        // click the Send button
+        cy.get("button").contains("Send").click()
+
+        // check if the error alert is displayed
+        cy.get("@alert").should("have.been.called")
+    })
+
 
 })
