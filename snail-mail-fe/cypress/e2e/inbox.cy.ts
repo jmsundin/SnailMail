@@ -195,5 +195,6 @@ describe("Inbox Component Tests", () => {
         // check if the success message is displayed
         cy.get("@alert").should("have.been.called")
         
+        cy.get("[data-testid='compose-component']").should("not.exist")
     })
 })
