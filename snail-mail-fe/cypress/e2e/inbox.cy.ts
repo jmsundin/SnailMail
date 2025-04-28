@@ -131,4 +131,23 @@ describe("Inbox Component Tests", () => {
         cy.get("[data-testid='compose-component']").should("not.exist")
     })
 
+
+    //test 7-------------
+    // error alert is displayed when the compose component is not filled out properly
+    it("Error alert is displayed when the compose component is not filled out properly", () => {
+        // first, click the button to open the compose component
+        cy.get("button").contains("Compose Email").click()
+
+        // stub the alert popup so Cypress doesn't get interrupted
+        cy.on("window:alert", cy.stub().as("alert"))
+
+        // find the Send button and click it
+        cy.get("button").contains("Send").click()
+
+        // check if the error alert is displayed
+        cy.get("@alert").should("have.been.called")
+    })
+
+   
+
 })
