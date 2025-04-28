@@ -118,4 +118,17 @@ describe("Inbox Component Tests", () => {
 
     })
 
+    //test 6-------------
+    // this test is to check if the compose component is not visible when the close button is clicked
+    it("Compose component is not visible when the close button is clicked", () => {
+        // first, click the button to open the compose component
+        cy.get("button").contains("Compose Email").click()
+
+        // find the close button and click it
+        cy.get("button.btn-close").click()
+
+        // check if the compose component is not visible
+        cy.get("[data-testid='compose-component']").should("not.exist")
+    })
+
 })
