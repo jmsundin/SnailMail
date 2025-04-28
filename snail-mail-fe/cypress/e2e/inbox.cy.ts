@@ -174,5 +174,26 @@ describe("Inbox Component Tests", () => {
         cy.get("@alert").should("have.been.called")
     })
 
+    
+    // test 9-------------
+    // success message is displayed when the email is sent successfully
+    it("Success message is displayed when the email is sent successfully", () => {
+        // first, click the button to open the compose component
+        cy.get("button").contains("Compose Email").click()
 
+        // type in the compose component
+        cy.get("input[name='recipient']").type("test@example.com")
+        cy.get("input[name='subject']").type("Test Subject")
+        cy.get("textarea[name='body']").type("Test Body")
+
+        // click the Send button
+        cy.get("button").contains("Send").click()
+
+        // stub the alert popup so Cypress doesn't get interrupted
+        cy.on("window:alert", cy.stub().as("alert"))
+
+        // check if the success message is displayed
+        cy.get("@alert").should("have.been.called")
+        
+    })
 })
