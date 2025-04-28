@@ -197,4 +197,25 @@ describe("Inbox Component Tests", () => {
         
         cy.get("[data-testid='compose-component']").should("not.exist")
     })
+
+    // test 10-------------
+    // error message is displayed when email recipient is not valid
+    it("Error message is displayed when email recipient is not valid", () => {
+        // first, click the button to open the compose component
+        cy.get("button").contains("Compose Email").click()
+
+        // type in the compose component
+        cy.get("input[name='recipient']").type("t.com")
+        cy.get("input[name='subject']").type("Test Subject")
+        cy.get("textarea[name='body']").type("Test Body")
+
+        // click the Send button
+        cy.get("button").contains("Send").click()
+
+        // stub the alert popup so Cypress doesn't get interrupted
+        cy.on("window:alert", cy.stub().as("alert"))
+
+        // check if the error message is displayed
+        cy.get("@alert").should("have.been.calledWith", "Recipient doesn't appear to be a valid email address")  
+    })
 })
