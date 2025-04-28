@@ -21,7 +21,7 @@ describe("Inbox Component Tests", () => {
     //beforeEach lets us set up functionality to run BEFORE EACH test 
     beforeEach(() => {
         //Render App.tsx (which renders our inbox component)
-        cy.visit("http://localhost:5176") //your port is probably 5173
+        cy.visit("http://localhost:5173") //your port is probably 5173
     })
 
     //test 1-------------
