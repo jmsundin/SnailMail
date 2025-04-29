@@ -24,7 +24,6 @@ describe("Inbox Component Tests", () => {
         cy.visit("http://localhost:5173") //your port is probably 5173
     })
 
-    //test 1-------------
     it("Fetches and displays the inbox from the backend", () => {
 
         //Extract the HTTP response when it comes in, so we can run tests on it
@@ -49,8 +48,7 @@ describe("Inbox Component Tests", () => {
         //TODO: we could have an if statment to check if there's any mail BEFORE running tests on the inbox
 
     })
-
-    //test 2------------
+    
     it("Shows an empty inbox message when there are no emails", () => {
 
         //This time, we'll manipulate the HTTP Response to have an empty response body
@@ -66,7 +64,6 @@ describe("Inbox Component Tests", () => {
 
     })
 
-    //test 3------------
     it("Displays an error alert and shows the 'no mail' message wif fetch inbox request fails", () => {
 
         //Force an error response after intercepting the HTTP response (note the shorthand for the URL)
@@ -83,7 +80,6 @@ describe("Inbox Component Tests", () => {
 
     })
 
-    //test 4------------------
     it("Displays fake mail after intercepting the GET request with a fixture", () => {
 
         //Entirely replace the response body of the GET request with our fixture
@@ -101,7 +97,6 @@ describe("Inbox Component Tests", () => {
         //Mock Philosophy: try to emulate the test that has a real GET request, so we can make sure everything works locally if the HTTP-based test fails 
     })
 
-    //test 5-------------
     //***NOTE: this test will be really helpful when you test the Compose component for your project 
     it("Renders the Compose component when the button is clicked", () => {
 
@@ -110,15 +105,14 @@ describe("Inbox Component Tests", () => {
 
         //Assert that the compose component is visible - using a data attribute
         cy.get("[data-testid='compose-component']")
-        .should("exist")
-        .should("be.visible")
+            .should("exist")
+            .should("be.visible")
 
         //can we chain should()s like this? looks like it
         //SHOULD we? sure, maybe put them on different lines like seen above
 
     })
 
-    //test 6-------------
     // this test is to check if the compose component is not visible when the close button is clicked
     it("Compose component is not visible when the close button is clicked", () => {
         // first, click the button to open the compose component
@@ -132,20 +126,41 @@ describe("Inbox Component Tests", () => {
     })
 
 
-    //test 7-------------
+    describe("Compose Component Error Handling", () => {
     // error alert is displayed when the compose component is not filled out properly
-    it("Error alert is displayed when the compose component is not filled out properly", () => {
-        // first, click the button to open the compose component
-        cy.get("button").contains("Compose Email").click()
+        it("Error alert is displayed when the compose component is not filled out properly", () => {
+            // first, click the button to open the compose component
+            cy.get("button").contains("Compose Email").click()
 
-        // stub the alert popup so Cypress doesn't get interrupted
-        cy.on("window:alert", cy.stub().as("alert"))
+            // stub the alert popup so Cypress doesn't get interrupted
+            cy.on("window:alert", cy.stub().as("alert"))
 
-        // find the Send button and click it
-        cy.get("button").contains("Send").click()
+            // find the Send button and click it
+            cy.get("button").contains("Send").click()
 
-        // check if the error alert is displayed
-        cy.get("@alert").should("have.been.called")
+            // check if the error alert is displayed
+            cy.get("@alert").should("have.been.called")
+        })
+
+        // error message is displayed when email recipient is not valid
+        it("Error message is displayed when email recipient is not valid", () => {
+            // first, click the button to open the compose component
+            cy.get("button").contains("Compose Email").click()
+
+            // type in the compose component
+            cy.get("input[name='recipient']").type("t.com")
+            cy.get("input[name='subject']").type("Test Subject")
+            cy.get("textarea[name='body']").type("Test Body")
+
+            // click the Send button
+            cy.get("button").contains("Send").click()
+
+            // stub the alert popup so Cypress doesn't get interrupted
+            cy.on("window:alert", cy.stub().as("alert"))
+
+            // check if the error message is displayed
+            cy.get("@alert").should("have.been.calledWith", "Recipient doesn't appear to be a valid email address")  
+        })
     })
 
     // test 8-------------
@@ -198,24 +213,4 @@ describe("Inbox Component Tests", () => {
         cy.get("[data-testid='compose-component']").should("not.exist")
     })
 
-    // test 10-------------
-    // error message is displayed when email recipient is not valid
-    it("Error message is displayed when email recipient is not valid", () => {
-        // first, click the button to open the compose component
-        cy.get("button").contains("Compose Email").click()
-
-        // type in the compose component
-        cy.get("input[name='recipient']").type("t.com")
-        cy.get("input[name='subject']").type("Test Subject")
-        cy.get("textarea[name='body']").type("Test Body")
-
-        // click the Send button
-        cy.get("button").contains("Send").click()
-
-        // stub the alert popup so Cypress doesn't get interrupted
-        cy.on("window:alert", cy.stub().as("alert"))
-
-        // check if the error message is displayed
-        cy.get("@alert").should("have.been.calledWith", "Recipient doesn't appear to be a valid email address")  
-    })
 })
