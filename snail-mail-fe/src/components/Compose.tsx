@@ -96,7 +96,7 @@ export const Compose:React.FC<Props> = ({onClose, ...testId}) => {
             </div>
 
             <div className="card-body">
-                <textarea name="body" className="form-control border-0 shadow-none" rows={6} onChange={handleInputChange}></textarea>
+                <textarea aria-label="body" name="body" placeholder="Write your message here..." className="form-control border-0 shadow-none" rows={6} onChange={handleInputChange}></textarea>
             </div>
 
             <button className="btn btn-sm btn-outline-primary d-block mx-auto" onClick={sendEmail}>Send</button>
