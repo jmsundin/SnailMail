@@ -156,7 +156,7 @@ test("error page component renders when invalid URL is visited", async ({browser
     const page = await browserContext.newPage()
 
     //use the page to navigate to an invalid URL!
-    await page.goto("http://localhost:5177/invalidURL")
+    await page.goto("http://localhost:5173/invalidURL")
 
     //Assert that our error page shows up
     await expect(page.getByText("Welcome to the Error Page")).toBeVisible()
