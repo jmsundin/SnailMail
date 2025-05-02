@@ -45,7 +45,7 @@ test("user can send email via compose component", async ({page}) => {
     await page.getByRole('button', {name: "Send"}).click()
 
     //Wait for an HTTP response to come back from the /mail URL
-    const response = await page.waitForResponse("**/mail")
+    const response = await page.waitForResponse("http://localhost:8080/mail")
 
     //Run some assertions on the values of the HTTP Response
     expect(response.status()).toBe(200) //check that the status code === 200
@@ -53,7 +53,8 @@ test("user can send email via compose component", async ({page}) => {
     //extract the response data to test the fields
     const jsonResponse = await response.json();
     expect(jsonResponse.recipient).toBe("test@snailmail.com")
-
+    
+    //TODO: This doesn't work in Firefox, json parsing issues. 
 })
 
 //Test 2: Check that the appropriate alert is sent when an email is sent with no Subject
@@ -162,4 +163,77 @@ test("error page component renders when invalid URL is visited", async ({browser
 
     //good practice - close your context once you're done with it
     await browserContext.close()
+})
+
+//Test 7: Tests logs the correct response data - example of using ConsoleMessage
+test("logs correct data from the backend after sending an email", async ({page}) => {
+
+    //Fill out a valid form
+    await page.getByRole("textbox", {name: "recipient"}).fill("test@snailmail.com")
+    await page.getByRole("textbox", {name: "subject"}).fill("anything")
+    await page.getByRole("textbox", {name: "body"}).fill("anything at all")
+
+    //Listen for console messages, and assert the printed data
+    page.on('console', async (message) => {
+
+        //Firefox is strict - gotta convert this value before asserting what it equals
+        const parsedMessage = await message.args()[0].jsonValue()
+
+        expect(parsedMessage).toEqual({
+            sender: "me@snailmail.com", 
+            recipient: "test@snailmail.com", 
+            subject: "anything", 
+            body: "anything at all"})
+    })
+
+    //Click send so that the console event actually trigger
+    await page.getByRole('button', {name: "Send"}).click()
+
+})
+
+//Test 1.5: Make sure user can compose and send a valid email (NOW WITH A .HAR FILE!)
+test("user can send email via compose component... NOW WITH .HAR FILE", async ({browser}) => {
+
+    //Create a new context so we can record a .HAR file
+    const browserContext = await browser.newContext({
+        recordHar: {
+            path: "har-files/sendmail.har", //the folder/file the .HAR file will reside in,
+            content: "embed" //embed the response bodies into the .HAR file
+        }
+    })
+
+    //since the BrowserContext ignores the beforeEach, we have a little setup to do
+    const page = await browserContext.newPage()
+    await page.goto('/') //Playwright goes to the baseURL defined in our config file 
+    await page.getByRole('button', {name: "Compose Email"}).click() //Open Compose.tsx
+
+    //I like to select elements by the easiest field to access that's still unique
+    await page.getByRole("textbox", {name: "recipient"}).fill("test@snailmail.com")
+    await page.getByRole("textbox", {name: "subject"}).fill("anything")
+    await page.getByRole("textbox", {name: "body"}).fill("anything at all")
+
+    //dialog - an event that gets emitted when a dialog element appears (like our alert()!)
+    page.once('dialog', async (dialog) => {
+        expect(dialog.message()).toEqual("Sent Mail to: test@snailmail.com")
+        await dialog.accept() //.accept() is like hitting "ok" to dismiss the alert
+        //NOTE: we won't see this alert in the GUI, Playwright automatically dismisses them
+    })
+
+    //click the send button (which should trigger our eventListener)
+    await page.getByRole('button', {name: "Send"}).click()
+
+    //Wait for an HTTP response to come back from the /mail URL
+    const response = await page.waitForResponse("http://localhost:8080/mail")
+
+    //Run some assertions on the values of the HTTP Response
+    expect(response.status()).toBe(200) //check that the status code === 200
+
+    //extract the response data to test the fields
+    const jsonResponse = await response.json();
+    expect(jsonResponse.recipient).toBe("test@snailmail.com")
+    
+    //This command closes the context, which records the HAR file
+    await browserContext.close()
+
+    //TODO: This doesn't work in Firefox, json parsing issues. 
 })
