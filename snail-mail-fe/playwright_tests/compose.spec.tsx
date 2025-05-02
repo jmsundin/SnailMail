@@ -5,6 +5,22 @@ import {test, expect, request} from '@playwright/test'
 test.beforeEach(async ({ page }) => {
     await page.goto('/') //Playwright goes to the baseURL defined in our config file 
     await page.getByRole('button', {name: "Compose Email"}).click() //Open Compose.tsx
+    // Alternative ways to locate the Compose Email button that are more robust to UI changes:
+    
+    // 1. Using data-testid attribute (most robust for testing)
+    // await page.getByTestId("compose-button").click()
+    
+    // 2. Using exact text content with getByText
+    // await page.getByText("Compose Email", { exact: true }).click()
+    
+    // 3. Using a combination of role and test ID
+    // await page.getByRole('button').filter({ hasText: 'Compose Email' }).click()
+    
+    // 4. Using CSS selector if there's a specific class
+    // await page.locator('.compose-button').click()
+    
+    // The current implementation uses getByRole which is good for accessibility,
+    // but adding a data-testid would be the most robust approach for testing
     
     //an assertion in the beforeEach - make sure compose exists
     await expect(page.getByTestId("compose-component")).toBeVisible()
