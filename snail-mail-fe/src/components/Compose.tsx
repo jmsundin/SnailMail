@@ -2,7 +2,7 @@
 //Takes 2 Values:
     //1) The function that closes this component
 
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import { useState } from "react"
 
 //our Props interface outlines 1 entity
@@ -71,8 +71,9 @@ export const Compose:React.FC<Props> = ({onClose, ...testId}) => {
             onClose() //close the component after sending mail
         } catch (e) {
             //e is "unknown" type here - so we need to check its type before we can do Error-related stuff
-            if(e instanceof Error){
-                alert(e.message)
+            if(e instanceof AxiosError){
+                console.log(e)
+                alert(e.response?.data.message)
             } else {
                 alert("Some unknown error occurred!")
             }

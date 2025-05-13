@@ -1,6 +1,9 @@
 package com.revature.SnailMailBE.controllers;
 
 import com.revature.SnailMailBE.models.Mail;
+import com.revature.SnailMailBE.services.MailService;
+import org.apache.coyote.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,56 +19,63 @@ import jakarta.servlet.http.HttpServletRequest;
 @CrossOrigin //Allows requests from any origin (this will let our FE/BE communicate)
 public class MailController {
 
+    //Because the MailController depends on the Service, we must inject it
+    //We do this so we can use its methods
+    private MailService mailService;
+
+    //Constructor Injection - best practice for autowiring
+    @Autowired
+    public MailController(MailService mailService) {
+        this.mailService = mailService;
+    }
+
     //This method sends a user's inbox back to them (a List of Mail objects)
     @GetMapping
     public ResponseEntity<List<Mail>> getInbox(){
 
-        //In a real app, this would send a request to the database to get the user's inbox mail records
-        //For now, we'll return a hardcoded list of Mail
-        List<Mail> inbox = List.of(
-                new Mail("snail@snailmail.com", "Hey", "me@snailmail.com", "I am a snail"),
-                new Mail("snail@snailmail.com", "Hey", "me@snailmail.com", "I have a shell"),
-                new Mail("slug@snailmail.com", "Hey", "me@snailmail.com", "I am a slug"),
-                new Mail("clam@snailmail.com", "Hey", "me@snailmail.com", "...")
-        );
+        //Send a request to the service layer to get the inbox
+        List<Mail> inbox = mailService.getInbox();
 
         //Easily configure and return an HTTP response thanks to ResponseEntity
-        //200 level status code, and inbox as the response body
-        return ResponseEntity.ok().body(inbox);
+        //200 level status code, or 204 status code if inbox is empty
+        if(inbox == null){
+            return ResponseEntity.noContent().build(); //204 status code
+        } else {
+            return ResponseEntity.ok().body(inbox); //200 status code
+        }
 
     }
 
     //This method will take in a Mail object and send a (fake) email
     @PostMapping(produces = "application/json")
     public ResponseEntity<?> sendMail(@RequestBody Mail mail, HttpServletRequest request) {
-
-        String userAgent = request.getHeader("User-Agent");
-        if (userAgent != null && userAgent.contains("Firefox")) {
-            System.out.println("Received mail from Firefox: " + mail);
-            System.out.println("Headers: " + Collections.list(request.getHeaderNames())
-                .stream()
-                .collect(Collectors.toMap(h -> h, request::getHeader)));
-        }
-
         if (mail == null) {
             return ResponseEntity.badRequest().body(
                 java.util.Map.of("error", "Request body is missing or invalid")
             );
         }
-        
-        //Error handling to make sure it's valid mail (just a couple, to get the idea)
-        if(mail.getRecipient() == null || mail.getRecipient().isBlank()){
-            // 400 level status code, and return a JSON error object
+        if (mail.getRecipient() == null || mail.getRecipient().isBlank()) {
             return ResponseEntity.badRequest().body(
                 java.util.Map.of("error", "Recipient cannot be empty")
             );
         }
-        //TODO: check the other fields, and stuff like is the email address is valid
 
-        //In a real app, we'd send this deeper into the app to hit the database
+        // Optionally, log headers if needed
+        // System.out.println("Headers: " + Collections.list(request.getHeaderNames())
+        //     .stream()
+        //     .collect(Collectors.toMap(h -> h, request::getHeader)));
 
-        //For now, we'll just return the mail to the user
-        return ResponseEntity.ok().body(mail);
+        // Use the service to process and return the result
+        return ResponseEntity.ok().body(mailService.sendMail(mail));
+    }
+
+    //Spring MVC ExceptionHandler - super generic one to help with responses/tests
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleException(Exception e) {
+        System.out.println(e.getMessage());
+        return ResponseEntity.badRequest().body(
+            java.util.Map.of("error", e.getMessage())
+        );
     }
 
 }

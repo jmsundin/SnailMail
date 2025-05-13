@@ -19,6 +19,12 @@ public class User {
         this.role = role;
     }
 
+    //Quick constructor for use in login() - just username and password
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
     public String getUsername() {
         return username;
     }
