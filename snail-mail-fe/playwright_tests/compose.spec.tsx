@@ -57,6 +57,7 @@ test("user can send email via compose component", async ({page}) => {
     //Run some assertions on the values of the HTTP Response
     expect(response.status()).toBe(200) //check that the status code === 200
 
+    console.log("Response: " + response);
     //extract the response data to test the fields
     const bodyText = await response.text();
     if (!bodyText) {
@@ -101,10 +102,6 @@ test("shows alert when trying to send mail with no subject", async ({page}) => {
 //Test 3: The backend sends an erroneous response when mail is sent with no recipient
 test("backend rejects emails with missing recipient", async () => {
 
-    //Recall that the backend should send a null body and a 400 status code 
-    //IF the recipient field is empty.
-    //Yes, the front end checks for this, but we'll send a manual HTTP request to bypass that check
-
     //Make a new ApiRequestContext so we can directly send an HTTP request 
     const requestContext = await request.newContext()
 
@@ -123,7 +120,7 @@ test("backend rejects emails with missing recipient", async () => {
 
     //make sure the response body is null
     const body = await response.text() //turn it into text (can't parse JSON from null)
-    expect(body).toBe("")
+    expect(body).toBe("{\"error\":\"Recipient cannot be empty\"}")
 
 })
 
@@ -169,7 +166,13 @@ test("close compose component, render Compose Email button when X is clicked", a
 test("error page component renders when invalid URL is visited", async ({browser}) => {
 
     //Create a new Browser context - isolated from the actual browser the app is running on
-    const browserContext = await browser.newContext()
+    // const browserContext = await browser.newContext({
+    //     recordHar: {
+    //         path: "har-files/sendmail.har",
+    //         content: "embed"
+    //     }
+    // });
+    const browserContext = await browser.newContext();
 
     //Create a new page based on this isolated Browser Context
     const page = await browserContext.newPage()
@@ -214,12 +217,13 @@ test("logs correct data from the backend after sending an email", async ({page})
 test("user can send email via compose component... NOW WITH .HAR FILE", async ({browser}) => {
 
     //Create a new context so we can record a .HAR file
-    const browserContext = await browser.newContext({
-        recordHar: {
-            path: "har-files/sendmail.har", //the folder/file the .HAR file will reside in,
-            content: "embed" //embed the response bodies into the .HAR file
-        }
-    })
+    // const browserContext = await browser.newContext({
+    //     recordHar: {
+    //         path: "har-files/sendmail.har",
+    //         content: "embed"
+    //     }
+    // });
+    const browserContext = await browser.newContext();
 
     //since the BrowserContext ignores the beforeEach, we have a little setup to do
     const page = await browserContext.newPage()
@@ -266,7 +270,7 @@ test("user can send email via compose component... NOW WITH .HAR FILE", async ({
     }
 
     //This command closes the context, which records the HAR file
-    await browserContext.close()
+    // await browserContext.close()
 
     //TODO: This doesn't work in Firefox, json parsing issues. 
 })
