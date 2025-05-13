@@ -5,6 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 //Remember the 3 annotations that we include for a Spring MVC Controller:
 @RestController //Makes the Class a Bean, and turns response data into JSON
@@ -32,13 +36,29 @@ public class MailController {
     }
 
     //This method will take in a Mail object and send a (fake) email
-    @PostMapping
-    public ResponseEntity<Mail> sendMail(@RequestBody Mail mail) {
+    @PostMapping(produces = "application/json")
+    public ResponseEntity<?> sendMail(@RequestBody Mail mail, HttpServletRequest request) {
 
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent != null && userAgent.contains("Firefox")) {
+            System.out.println("Received mail from Firefox: " + mail);
+            System.out.println("Headers: " + Collections.list(request.getHeaderNames())
+                .stream()
+                .collect(Collectors.toMap(h -> h, request::getHeader)));
+        }
+
+        if (mail == null) {
+            return ResponseEntity.badRequest().body(
+                java.util.Map.of("error", "Request body is missing or invalid")
+            );
+        }
+        
         //Error handling to make sure it's valid mail (just a couple, to get the idea)
         if(mail.getRecipient() == null || mail.getRecipient().isBlank()){
-            //400 level status code, and empty response body
-            return ResponseEntity.badRequest().body(null);
+            // 400 level status code, and return a JSON error object
+            return ResponseEntity.badRequest().body(
+                java.util.Map.of("error", "Recipient cannot be empty")
+            );
         }
         //TODO: check the other fields, and stuff like is the email address is valid
 
@@ -46,7 +66,6 @@ public class MailController {
 
         //For now, we'll just return the mail to the user
         return ResponseEntity.ok().body(mail);
-
     }
 
 }
