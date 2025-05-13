@@ -1,7 +1,12 @@
 package com.revature.SnailMailBE.models;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 //This model class will help us model Mail data.
 //We'll make Mail objects based on this Class to help us send data to/from the front end
+
+@Document("mail")
 public class Mail {
 
     //Fields -
