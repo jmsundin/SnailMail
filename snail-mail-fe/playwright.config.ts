@@ -5,8 +5,8 @@ export default defineConfig({
   testDir: './playwright_tests', //the folder we made to hold our tests
   projects: [
     {name: "Chromium", use: {browserName: "chromium"}},
-    // {name: "Firefox", use: {browserName: "firefox"}},
-    // {name: "Webkit", use: {browserName: "webkit"}}
+    {name: "Firefox", use: {browserName: "firefox"}},
+    {name: "Webkit", use: {browserName: "webkit"}}
   ],
   use: { 
     browserName: 'chromium', //or firefox or webkit! 

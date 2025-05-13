@@ -1,5 +1,12 @@
 import {test, expect, request} from '@playwright/test'
 
+type MailResponse = {
+  sender: string;
+  recipient: string;
+  subject: string;
+  body: string;
+} | null;
+
 //Before each test, go to our main page (render the App.tsx)
 //Then, click open the Compose Component
 test.beforeEach(async ({ page }) => {
@@ -51,10 +58,22 @@ test("user can send email via compose component", async ({page}) => {
     expect(response.status()).toBe(200) //check that the status code === 200
 
     //extract the response data to test the fields
-    const jsonResponse = await response.json();
-    expect(jsonResponse.recipient).toBe("test@snailmail.com")
-    
-    //TODO: This doesn't work in Firefox, json parsing issues. 
+    const bodyText = await response.text();
+    if (!bodyText) {
+        throw new Error("Response body is empty");
+    }
+    let jsonResponse: MailResponse = null;
+    try {
+        jsonResponse = JSON.parse(bodyText);
+    } catch {
+        throw new Error("Response body is not valid JSON: " + bodyText);
+    }
+
+    if (jsonResponse) {
+        expect(jsonResponse.recipient).toBe("test@snailmail.com");
+    } else {
+        throw new Error("jsonResponse is null");
+    }
 })
 
 //Test 2: Check that the appropriate alert is sent when an email is sent with no Subject
@@ -229,9 +248,23 @@ test("user can send email via compose component... NOW WITH .HAR FILE", async ({
     expect(response.status()).toBe(200) //check that the status code === 200
 
     //extract the response data to test the fields
-    const jsonResponse = await response.json();
-    expect(jsonResponse.recipient).toBe("test@snailmail.com")
-    
+    const bodyText = await response.text();
+    if (!bodyText) {
+        throw new Error("Response body is empty");
+    }
+    let jsonResponse: MailResponse = null;
+    try {
+        jsonResponse = JSON.parse(bodyText);
+    } catch {
+        throw new Error("Response body is not valid JSON: " + bodyText);
+    }
+
+    if (jsonResponse) {
+        expect(jsonResponse.recipient).toBe("test@snailmail.com");
+    } else {
+        throw new Error("jsonResponse is null");
+    }
+
     //This command closes the context, which records the HAR file
     await browserContext.close()
 
