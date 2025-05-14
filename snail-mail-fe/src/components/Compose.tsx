@@ -58,6 +58,7 @@ export const Compose:React.FC<Props> = ({onClose, ...testId}) => {
             }
 
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mailToSend.recipient)) {
+                console.log("Recipient doesn't appear to be a valid email address");
                 throw new Error("Recipient doesn't appear to be a valid email address");
             }
 
@@ -74,7 +75,9 @@ export const Compose:React.FC<Props> = ({onClose, ...testId}) => {
             if(e instanceof AxiosError){
                 console.log(e)
                 alert(e.response?.data.message)
-            } else {
+            } else if (e instanceof Error) {
+                alert(e.message)
+            }else {
                 alert("Some unknown error occurred!")
             }
         }
