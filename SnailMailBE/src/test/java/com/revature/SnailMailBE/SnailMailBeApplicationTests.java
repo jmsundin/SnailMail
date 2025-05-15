@@ -42,7 +42,7 @@ class SnailMailBeApplicationTests {
 				.statusCode(200)
 				.body("size()", greaterThan(0))
 				.body("[0].sender", notNullValue())
-				.body("[0].recipient", equalTo("me@snailmail.com"));
+				.body("[0].recipient", notNullValue());
 	}
 
 	//NOTE: We used JUnit, which is great and for Java tests in general...

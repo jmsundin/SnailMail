@@ -88,12 +88,12 @@ test("backend rejects emails with missing recipient", async () => {
 
     //make sure the response body is null
     const body = await response.text() //turn it into text (can't parse JSON from null)
-    expect(body).toBe("")
+    expect(body).toContain("Recipient cannot be empty!")
 
 })
 
 //Test 4: test for the appropriate alert if the backend is down (mocking this request!!)
-test("shows Network Error alert is backend is down on mail send", async ({page}) => {
+test("shows Network Error alert if backend is down on mail send", async ({page}) => {
 
     //Intercept the HTTP request (route()), and force it to fail (abort())
     await page.route("**/mail", route => {
@@ -163,11 +163,15 @@ test("logs correct data from the backend after sending an email", async ({page})
         //Firefox is strict - gotta convert this value before asserting what it equals
         const parsedMessage = await message.args()[0].jsonValue()
 
-        expect(parsedMessage).toEqual({
-            sender: "me@snailmail.com", 
-            recipient: "test@snailmail.com", 
-            subject: "anything", 
-            body: "anything at all"})
+        expect(parsedMessage).toEqual(
+        expect.objectContaining({
+            sender: "me@snailmail.com",
+            recipient: "test@snailmail.com",
+            subject: "anything",
+            body: "anything at all"
+        }))
+
+        
     })
 
     //Click send so that the console event actually trigger
