@@ -56,7 +56,13 @@ public class MailController {
         }
         if (mail.getRecipient() == null || mail.getRecipient().isBlank()) {
             return ResponseEntity.badRequest().body(
-                java.util.Map.of("error", "Recipient cannot be empty")
+                java.util.Map.of("error", "Recipient cannot be empty!")
+            );
+        }
+
+        if (mail.getSubject() == null || mail.getSubject().length() > 20) {
+            return ResponseEntity.badRequest().body(
+                java.util.Map.of("error", "Save it for the message body, buddy")
             );
         }
 
