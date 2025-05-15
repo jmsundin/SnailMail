@@ -73,7 +73,7 @@ export const Compose:React.FC<Props> = ({onClose, ...testId}) => {
             //e is "unknown" type here - so we need to check its type before we can do Error-related stuff
             if(e instanceof AxiosError){
                 console.log(e)
-                alert(e.response?.data.message)
+                alert(e.message)
             } else {
                 alert("Some unknown error occurred!")
             }
