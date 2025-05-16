@@ -24,10 +24,24 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest
 @AutoConfigureMockMvc //<- IMPORTANT - This sets up MockMVC so we can send mock requests
 class SnailMailBeApplicationTests {
+
+	//Some setup first
+
+	//Mock MailService -
+	//we'll use this to test the controller without calling real service methods
+	@MockitoBean
+	private MailService mockMailService;
+
+	//This object will help us write mock HTTP requests -
+	//so we can test strictly the controller logic, not depending on HTTP
+	@Autowired
+	private MockMvc mockMvc;
 
 	@BeforeAll
 	static void setup(){
@@ -159,19 +173,6 @@ class SnailMailBeApplicationTests {
 
 	//Sixth Test - use Mockito and MockMVC to test 204 on empty inbox
 
-	//Some setup first
-
-	//Mock MailService -
-	//we'll use this to test the controller without calling real service methods
-	@MockitoBean
-	private MailService mockMailService;
-
-	//This object will help us write mock HTTP requests -
-	//so we can test strictly the controller logic, not depending on HTTP
-	@Autowired
-	private MockMvc mockMvc;
-
-
 	@Test
 	void returnsNoContentIfInboxIsEmpty() throws Exception {
 
@@ -259,5 +260,31 @@ class SnailMailBeApplicationTests {
 		response.then()
 			.statusCode(401)
 			.body(equalTo("Invalid username or password"));		
+	}
+
+	@Test
+	void sendMailReturnsMailObjectOnSuccess() throws Exception {
+	    // Arrange: create a Mail object and configure the mock service
+	    Mail mail = new Mail("me@snailmail.com", "Test Subject", "you@snailmail.com", "Hello!");
+	    when(mockMailService.sendMail(any(Mail.class))).thenReturn(mail);
+	
+	    // Convert the mail object to JSON (you can use Jackson's ObjectMapper)
+	    String mailJson = """
+	        {
+	            "sender": "me@snailmail.com",
+	            "subject": "Test Subject",
+				"recipient": "you@snailmail.com",
+				"body": "Hello!"
+			}
+	        """;
+
+		// Act & Assert: perform the POST and check the response
+		mockMvc.perform(
+				post("/mail")
+					.contentType("application/json")
+					.content(mailJson)
+			)
+			.andExpect(status().isOk())
+			.andExpect(content().json(mailJson));
 	}
 }
