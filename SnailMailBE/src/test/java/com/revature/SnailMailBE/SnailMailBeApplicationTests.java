@@ -1,6 +1,7 @@
 package com.revature.SnailMailBE;
 
 import com.revature.SnailMailBE.models.Mail;
+import com.revature.SnailMailBE.models.User;
 import com.revature.SnailMailBE.services.MailService;
 
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -202,10 +203,13 @@ class SnailMailBeApplicationTests {
 
 		//Send the PATCH request, extract the response, assert stuff on it
 		Response response = given()
-				.contentType("application/json")
-				.body(changePasswordAppropriateJson)
-				.when().patch("/user/password")
-				.then().extract().response();
+					.contentType("application/json")
+					.body(changePasswordAppropriateJson)
+				.when()
+					.patch("/user/password")
+				.then()
+					.extract()
+					.response();
 
 		//Assert 200 ok, assert the response body
 		response.then()
@@ -214,4 +218,46 @@ class SnailMailBeApplicationTests {
 
 	}
 
+	@Test
+	void testChangePasswordFailsOnIncorrectOldPassword(){
+
+		//Define the JSON object for the request body
+		String changePasswordIncorrectJson = """
+			{
+				"oldPassword": "incorrect",
+				"newPassword": "newPassword"
+			}
+			""";
+
+		Response response = given()
+				.contentType("application/json")
+				.body(changePasswordIncorrectJson)
+			.when()
+				.patch("/user/password")
+			.then()
+				.extract()
+				.response();
+
+		// Assert 400 bad request
+		response.then()
+				.statusCode(400)
+				.body(equalTo("Old password is incorrect!"));
+	}
+	
+	@Test
+	void testLoginIncorrectCredentials(){
+		
+		User incorrectCredentials = new User("incorrect-username", "incorrect@snailmail.com", "incorrect-password", "user");
+		Response response = given()
+					.contentType("application/json")
+					.body(incorrectCredentials)
+				.when()
+					.post("/auth/login")
+				.then()
+					.extract()
+					.response();
+		response.then()
+			.statusCode(401)
+			.body(equalTo("Invalid username or password"));		
+	}
 }

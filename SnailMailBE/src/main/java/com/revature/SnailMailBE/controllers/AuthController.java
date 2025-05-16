@@ -5,10 +5,18 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController //makes the class a bean, turns response data into JSON
 @RequestMapping("/auth") //Any request ending in /auth will come to this controller
 @CrossOrigin //allow requests from any origin
 public class AuthController {
+
+    private static final Map<String, String> users = Map.of(
+        "username", "password",
+        "alice", "alice123",
+        "bob", "bobpass"
+    );
 
     //Login - POST request to /auth/login
     //ResponseEntity<?> means we can send any type of data back
@@ -18,21 +26,26 @@ public class AuthController {
         //NOTE the HttpSession object in the param.
         //We can initialize it and store user info in it after successful login
 
-        //try to log in (HARDCODED)
-        if(incomingUser.getUsername().equals("username")
-        && incomingUser.getPassword().equals("password")){
+        String incomingUsername = incomingUser.getUsername();
+        String incomingEmail = incomingUser.getEmail();
+        String incomingPassword = incomingUser.getPassword();
 
-            //Imagine we checked the DB and found this user
-            //Create a new session, and store user info in it for easy access
-            User loggedInUser = new User("username",
-                    "email@snailmail.com",
-                    "password",
-                    "user");
+        User loggedInUser = new User(incomingUsername, incomingEmail, incomingPassword, "user");
+
+        if (!users.containsKey(incomingUsername)) {
+            return ResponseEntity.status(401).body("Invalid username or password");
+        }
+
+        if (!users.get(incomingUsername).equals(incomingPassword)) {
+            return ResponseEntity.status(401).body("Invalid username or password");
+        }
+        
+        if (users.containsKey(incomingUsername) && users.get(incomingUsername).equals(incomingPassword)) {
 
             //Store the user info in the session
-            session.setAttribute("username", loggedInUser.getUsername());
-            session.setAttribute("email", loggedInUser.getEmail());
-            session.setAttribute("role", loggedInUser.getRole());
+            session.setAttribute("username", incomingUsername);
+            session.setAttribute("email", incomingEmail);
+            session.setAttribute("role", "user");
             //Note: we didn't save the password in the session. No reason to!
 
             //It's really easy to extract this session info
