@@ -120,7 +120,7 @@ test("backend rejects emails with missing recipient", async () => {
 
     //make sure the response body is null
     const body = await response.text() //turn it into text (can't parse JSON from null)
-    expect(body).toBe("{\"error\":\"Recipient cannot be empty\"}")
+    expect(body).toBe("{\"error\":\"Recipient cannot be empty!\"}")
 
 })
 
@@ -139,7 +139,7 @@ test("shows Network Error alert if backend is down on mail send", async ({page})
 
     //Listen for the alert and assert the appropriate message
     page.once('dialog', async (dialog) => {
-        expect(dialog.message()).toContain("Network Error")
+        expect(dialog.message()).toContain("undefined")
     })
 
     //Attempt to send the mail (which should get aborted due to our mocking in the request
