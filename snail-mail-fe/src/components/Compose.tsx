@@ -76,6 +76,7 @@ export const Compose:React.FC<Props> = ({onClose, ...testId}) => {
                 console.log(e)
                 alert(e.response?.data.message)
             } else if (e instanceof Error) {
+                console.log(e)
                 alert(e.message)
             }else {
                 alert("Some unknown error occurred!")

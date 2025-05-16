@@ -5,6 +5,7 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { Table } from "react-bootstrap"
+import { Compose } from './Compose'
 
 //Interfaces in React/TS help us model data. It's like making a custom datatype
 interface Mail {
@@ -29,6 +30,9 @@ export const Inbox:React.FC = () => {
         -<the datatype of the variable>
         -(the initial value of the variable)
     */
+
+    const [showCompose, setShowCompose] = useState<boolean>(false)
+    const toggleShowCompose = (() => {setShowCompose(!showCompose)})
 
     
     //useEffect is a hook we can use to invoke functionality at certain events
@@ -88,6 +92,14 @@ export const Inbox:React.FC = () => {
                 </tbody>
             </Table>
             )}
+
+            {/* We'll define a boolean variable called showCompose.
+          If showCompose is true, show the Compose component.
+          If showCompose is false, show the button that opens the Compose component 
+        NOTICE: the data attribute - it'll help us select the Compose component for our tests */}
+      {showCompose ? <Compose data-testid="compose-component" onClose={toggleShowCompose}/> 
+      : <button className="btn btn-sm btn-outline-primary" onClick={toggleShowCompose}>Compose Email</button>}
+
 
         </div>
     )
